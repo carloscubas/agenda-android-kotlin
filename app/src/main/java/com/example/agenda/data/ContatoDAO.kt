@@ -20,4 +20,8 @@ interface ContatoDao {
 
     @Query("SELECT * FROM Contato")
     fun getAllContatos(): List<Contato>
+
+    fun isContato(telefone: String) : Boolean{
+        return true
+    }
 }
