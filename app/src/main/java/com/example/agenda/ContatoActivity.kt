@@ -1,20 +1,34 @@
 package com.example.agenda
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.example.agenda.data.Contato
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.*
 import java.text.SimpleDateFormat
 
 
 class ContatoActivity : AppCompatActivity() {
 
+    private val localArquivoFoto: String? = null
+    private var mCurrentPhotoPath: String? = null
     var cal: Calendar = Calendar.getInstance()
     var datanascimento: Button? = null
     var txtNome: EditText? = null
@@ -24,6 +38,8 @@ class ContatoActivity : AppCompatActivity() {
     var txtEmail: EditText? = null
     var contato: Contato? = null
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy")
+    val REQUEST_IMAGE_CAPTURE = 1
+    var imgContato: ImageView? = null
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +48,7 @@ class ContatoActivity : AppCompatActivity() {
 
         val myToolbar: Toolbar = findViewById(R.id.toolbar_child)
 
-        var imgContato: ImageView = findViewById(R.id.imgContato)
+        imgContato = findViewById(R.id.imgContato)
         txtNome = findViewById(R.id.txtNome)
         txtEndereco = findViewById(R.id.txtEndereco)
         txtTelefone = findViewById(R.id.txtTelefone)
@@ -44,6 +60,7 @@ class ContatoActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         btnCadastro.setOnClickListener {
+            contato?.foto = mCurrentPhotoPath
             contato?.nome = txtNome?.text.toString()
             contato?.endereco = txtEndereco?.text.toString()
             contato?.telefone = txtTelefone?.text.toString().toLong()
@@ -59,6 +76,23 @@ class ContatoActivity : AppCompatActivity() {
             finish()
         }
 
+        imgContato?.setOnClickListener{
+            dispatchTakePictureIntentSimple();
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK){
+            val extras = data?.extras
+            val imageBitmap = extras!!.get("data") as Bitmap
+            imgContato?.setImageBitmap(imageBitmap)
+            try {
+                this.storeImage(imageBitmap)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
     }
 
     override fun onResume() {
@@ -94,6 +128,12 @@ class ContatoActivity : AppCompatActivity() {
                 if ((contato?.dataNascimento != null)) {
                     txtDatanascimento.text = dateFormatter.format(Date(contato?.dataNascimento!!))
                 }
+
+                if(contato?.foto != null){
+                    readBitmapFile(contato?.foto!!);
+                    mCurrentPhotoPath = contato?.foto
+                }
+
                 txtEmail?.setText(contato?.email)
                 txtSite?.setText(contato?.site)
             } else {
@@ -102,9 +142,62 @@ class ContatoActivity : AppCompatActivity() {
         }
     }
 
+
     private fun updateDateInView(txtDatanascimento: Button) {
         val myFormat = "dd/MM/yyyy" // mention the format you need
         val sdf = SimpleDateFormat(myFormat, Locale.US)
         txtDatanascimento.text = sdf.format(cal.time)
     }
+
+    private fun dispatchTakePictureIntentSimple() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (takePictureIntent.resolveActivity(packageManager) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val imageFileName = "JPEG_" + timeStamp + "_"
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val image = File.createTempFile(
+            imageFileName, /* prefix */
+            ".jpg", /* suffix */
+            storageDir      /* directory */
+        )
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.absolutePath
+        return image
+    }
+
+    @Throws(IOException::class)
+    private fun storeImage(image: Bitmap) {
+        val pictureFile = createImageFile()
+        try {
+            val fos = FileOutputStream(pictureFile)
+            image.compress(Bitmap.CompressFormat.PNG, 90, fos)
+            fos.close()
+        } catch (e: FileNotFoundException) {
+            Log.d("ERRO", "File not found: " + e.message)
+        } catch (e: IOException) {
+            Log.d("ERRO", "Error accessing file: " + e.message)
+        }
+    }
+
+    private fun readBitmapFile(path: String) {
+        var bitmap: Bitmap? = null
+        val f = File(path)
+        val options = BitmapFactory.Options()
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888
+
+        try {
+            bitmap = BitmapFactory.decodeStream(FileInputStream(f), null, options)
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        }
+        imgContato?.setImageBitmap(bitmap)
+    }
+
 }
