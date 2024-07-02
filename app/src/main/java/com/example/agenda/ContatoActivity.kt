@@ -31,7 +31,6 @@ class ContatoActivity : AppCompatActivity() {
         setContentView(R.layout.activity_contato)
 
         val myToolbar: Toolbar = findViewById(R.id.toolbar_child)
-        val txtDatanascimento: Button = findViewById(R.id.txtDatanascimento)
 
         var imgContato: ImageView = findViewById(R.id.imgContato)
         txtNome = findViewById(R.id.txtNome)
@@ -43,24 +42,6 @@ class ContatoActivity : AppCompatActivity() {
 
         setSupportActionBar(myToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
-        val dateSetListener =
-            DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
-                cal.set(Calendar.YEAR, year)
-                cal.set(Calendar.MONTH, monthOfYear)
-                cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                updateDateInView(txtDatanascimento)
-            }
-
-        txtDatanascimento.setOnClickListener {
-            DatePickerDialog(
-                this@ContatoActivity,
-                dateSetListener,
-                cal.get(Calendar.YEAR),
-                cal.get(Calendar.MONTH),
-                cal.get(Calendar.DAY_OF_MONTH)
-            ).show()
-        }
 
         btnCadastro.setOnClickListener {
             contato?.nome = txtNome?.text.toString()
@@ -82,6 +63,27 @@ class ContatoActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        val txtDatanascimento: Button = findViewById(R.id.txtDatanascimento)
+
+        val dateSetListener =
+            DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+                cal.set(Calendar.YEAR, year)
+                cal.set(Calendar.MONTH, monthOfYear)
+                cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                updateDateInView(txtDatanascimento)
+            }
+
+        txtDatanascimento.setOnClickListener {
+            DatePickerDialog(
+                this@ContatoActivity,
+                dateSetListener,
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
         val intent = intent
         if(intent != null) {
             if (intent.getSerializableExtra("contato") != null) {
@@ -90,9 +92,7 @@ class ContatoActivity : AppCompatActivity() {
                 txtEndereco?.setText(contato?.endereco)
                 txtTelefone?.setText(contato?.telefone.toString())
                 if ((contato?.dataNascimento != null)) {
-                    datanascimento?.text = dateFormatter.format(Date(contato?.dataNascimento!!))
-                } else {
-                    datanascimento?.text = dateFormatter.format(Date())
+                    txtDatanascimento.text = dateFormatter.format(Date(contato?.dataNascimento!!))
                 }
                 txtEmail?.setText(contato?.email)
                 txtSite?.setText(contato?.site)
