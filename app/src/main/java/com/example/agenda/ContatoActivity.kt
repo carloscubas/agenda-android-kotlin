@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import com.example.agenda.data.Contato
 import java.util.*
 import java.text.SimpleDateFormat
 
@@ -16,6 +17,13 @@ class ContatoActivity : AppCompatActivity() {
 
     var cal: Calendar = Calendar.getInstance()
     var datanascimento: Button? = null
+    var txtNome: EditText? = null
+    var txtEndereco: EditText? = null
+    var txtTelefone: EditText? = null
+    var txtSite: EditText? = null
+    var txtEmail: EditText? = null
+    var contato: Contato? = null
+    val dateFormatter = SimpleDateFormat("dd/MM/yyyy")
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,12 +34,12 @@ class ContatoActivity : AppCompatActivity() {
         val txtDatanascimento: Button = findViewById(R.id.txtDatanascimento)
 
         var imgContato: ImageView = findViewById(R.id.imgContato)
-        var txtNome: EditText = findViewById(R.id.txtNome)
-        var txtEndereco: EditText = findViewById(R.id.txtEndereco)
-        var txtTelefone: EditText = findViewById(R.id.txtTelefone)
-        var txtSite: EditText = findViewById(R.id.txtSite)
+        txtNome = findViewById(R.id.txtNome)
+        txtEndereco = findViewById(R.id.txtEndereco)
+        txtTelefone = findViewById(R.id.txtTelefone)
+        txtSite = findViewById(R.id.txtSite)
+        txtEmail = findViewById(R.id.txtEmail)
         var btnCadastro: Button = findViewById(R.id.btnCadastro)
-        var txtEmail: EditText = findViewById(R.id.txtEmail)
 
         setSupportActionBar(myToolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
@@ -48,11 +56,49 @@ class ContatoActivity : AppCompatActivity() {
             DatePickerDialog(
                 this@ContatoActivity,
                 dateSetListener,
-                // set DatePickerDialog to point to today's date when it loads up
                 cal.get(Calendar.YEAR),
                 cal.get(Calendar.MONTH),
                 cal.get(Calendar.DAY_OF_MONTH)
             ).show()
+        }
+
+        btnCadastro.setOnClickListener {
+            contato?.nome = txtNome?.text.toString()
+            contato?.endereco = txtEndereco?.text.toString()
+            contato?.telefone = txtTelefone?.text.toString().toLong()
+            contato?.dataNascimento = cal.timeInMillis
+            contato?.email = txtEmail?.text.toString()
+            contato?.site = txtSite?.text.toString()
+
+            if(contato?.id?.toInt() == 0){
+                Application.database?.contatoDao()?.insert(contato!!)
+            }else{
+                Application.database?.contatoDao()?.update(contato!!)
+            }
+            finish()
+        }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val intent = intent
+        if(intent != null) {
+            if (intent.getSerializableExtra("contato") != null) {
+                contato = intent.getSerializableExtra("contato") as Contato
+                txtNome?.setText(contato?.nome)
+                txtEndereco?.setText(contato?.endereco)
+                txtTelefone?.setText(contato?.telefone.toString())
+                if ((contato?.dataNascimento != null)) {
+                    datanascimento?.text = dateFormatter.format(Date(contato?.dataNascimento!!))
+                } else {
+                    datanascimento?.text = dateFormatter.format(Date())
+                }
+                txtEmail?.setText(contato?.email)
+                txtSite?.setText(contato?.site)
+            } else {
+                contato = Contato()
+            }
         }
     }
 
@@ -61,5 +107,4 @@ class ContatoActivity : AppCompatActivity() {
         val sdf = SimpleDateFormat(myFormat, Locale.US)
         txtDatanascimento.text = sdf.format(cal.time)
     }
-
 }

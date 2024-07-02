@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".Application"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -20,11 +21,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Lista" />
         </activity>
-
-        <activity
-            android:name=".BottonNavigate"
-            android:exported="false"
-            android:label="@string/title_activity_botton_navigate" />
         <activity
             android:name=".Lista"
             android:exported="true">
