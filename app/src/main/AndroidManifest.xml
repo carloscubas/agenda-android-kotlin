@@ -13,19 +13,6 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:targetApi="31">
         <activity
-            android:name=".ContatoActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".Lista" />
-        </activity>
-
-        <activity
-            android:name=".BottonNavigate"
-            android:exported="false"
-            android:label="@string/title_activity_botton_navigate" />
-        <activity
             android:name=".Lista"
             android:exported="true">
             <intent-filter>
