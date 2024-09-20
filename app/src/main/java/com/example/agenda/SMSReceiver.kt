@@ -24,7 +24,7 @@ class SMSReceiver : BroadcastReceiver() {
             val format = intentExtras.getString("format")
             smsMessage = SmsMessage.createFromPdu( sms[i] as ByteArray, format )
         }
-        if(Application.database?.contatoDao()?.isContato(smsMessage?.originatingAddress.toString()) == true){
+        if(Application.database?.contatoDao()?.isContato(smsMessage?.originatingAddress.toString()) == 1){
             val mp = MediaPlayer.create(context, R.raw.gol4)
             mp.start()
         }
