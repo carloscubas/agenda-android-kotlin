@@ -62,7 +62,9 @@ class ContatoActivity : AppCompatActivity() {
             contato?.foto = mCurrentPhotoPath
             contato?.nome = txtNome?.text.toString()
             contato?.endereco = txtEndereco?.text.toString()
-            contato?.telefone = txtTelefone?.text.toString().toLong()
+            contato?.telefone = txtTelefone?.text?.let {
+                it.toString().toLongOrNull()
+            }
             contato?.dataNascimento = cal.timeInMillis
             contato?.email = txtEmail?.text.toString()
             contato?.site = txtSite?.text.toString()
@@ -87,7 +89,9 @@ class ContatoActivity : AppCompatActivity() {
             val imageBitmap = extras!!.get("data") as Bitmap
             try {
                 this.storeImage(imageBitmap)
-                mCurrentPhotoPath?.let {readBitmapFile(it)}
+                mCurrentPhotoPath?.let {
+                    Log.d("agenda", "Path new: $it")
+                    readBitmapFile(it)}
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -123,16 +127,17 @@ class ContatoActivity : AppCompatActivity() {
                 contato = intent.getSerializableExtra("contato") as Contato
                 txtNome?.setText(contato?.nome)
                 txtEndereco?.setText(contato?.endereco)
-                txtTelefone?.setText(contato?.telefone.toString())
-                if ((contato?.dataNascimento != null)) {
-                    txtDatanascimento.text = dateFormatter.format(Date(contato?.dataNascimento!!))
+                contato?.telefone?.let {
+                    txtTelefone?.setText(it.toString())
                 }
-
+                contato?.dataNascimento?.let {
+                    txtDatanascimento.text = dateFormatter.format(Date(it))
+                }
                 contato?.foto?.let {
                     readBitmapFile(it);
                     mCurrentPhotoPath = it
+                    Log.d("agenda", "Path update: $it")
                 }
-
                 txtEmail?.setText(contato?.email)
                 txtSite?.setText(contato?.site)
             } else {
@@ -183,16 +188,15 @@ class ContatoActivity : AppCompatActivity() {
     }
 
     private fun readBitmapFile(path: String) {
-        var bitmap: Bitmap? = null
         val f = File(path)
         val options = BitmapFactory.Options()
         options.inPreferredConfig = Bitmap.Config.ARGB_8888
 
         try {
-            bitmap = BitmapFactory.decodeStream(FileInputStream(f), null, options)
+            var bitmap = BitmapFactory.decodeStream(FileInputStream(f), null, options)
+            imgContato?.setImageBitmap(bitmap)
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         }
-        imgContato?.setImageBitmap(bitmap)
     }
 }
