@@ -1,13 +1,10 @@
 package com.example.agenda
 
-import android.annotation.TargetApi
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.telephony.SmsMessage
 import android.media.MediaPlayer
-import androidx.annotation.RequiresApi
 
 const val SMS_BUNDLE = "pdus"
 

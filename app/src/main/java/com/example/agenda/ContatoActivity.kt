@@ -6,6 +6,7 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -24,9 +25,7 @@ import java.io.IOException
 import java.util.*
 import java.text.SimpleDateFormat
 
-
 class ContatoActivity : AppCompatActivity() {
-
     private val localArquivoFoto: String? = null
     private var mCurrentPhotoPath: String? = null
     var cal: Calendar = Calendar.getInstance()
@@ -86,9 +85,9 @@ class ContatoActivity : AppCompatActivity() {
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK){
             val extras = data?.extras
             val imageBitmap = extras!!.get("data") as Bitmap
-            imgContato?.setImageBitmap(imageBitmap)
             try {
                 this.storeImage(imageBitmap)
+                mCurrentPhotoPath?.let {readBitmapFile(it)}
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -129,9 +128,9 @@ class ContatoActivity : AppCompatActivity() {
                     txtDatanascimento.text = dateFormatter.format(Date(contato?.dataNascimento!!))
                 }
 
-                if(contato?.foto != null){
-                    readBitmapFile(contato?.foto!!);
-                    mCurrentPhotoPath = contato?.foto
+                contato?.foto?.let {
+                    readBitmapFile(it);
+                    mCurrentPhotoPath = it
                 }
 
                 txtEmail?.setText(contato?.email)
@@ -141,7 +140,6 @@ class ContatoActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun updateDateInView(txtDatanascimento: Button) {
         val myFormat = "dd/MM/yyyy" // mention the format you need
@@ -156,7 +154,6 @@ class ContatoActivity : AppCompatActivity() {
         }
     }
 
-    @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
@@ -172,7 +169,6 @@ class ContatoActivity : AppCompatActivity() {
         return image
     }
 
-    @Throws(IOException::class)
     private fun storeImage(image: Bitmap) {
         val pictureFile = createImageFile()
         try {
@@ -199,5 +195,4 @@ class ContatoActivity : AppCompatActivity() {
         }
         imgContato?.setImageBitmap(bitmap)
     }
-
 }
