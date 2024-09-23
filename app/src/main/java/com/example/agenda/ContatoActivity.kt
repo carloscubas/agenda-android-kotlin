@@ -43,6 +43,7 @@ class ContatoActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("Agenda", "ContatoActivity onCreate")
         setContentView(R.layout.activity_contato)
 
         val myToolbar: Toolbar = findViewById(R.id.toolbar_child)
@@ -84,6 +85,7 @@ class ContatoActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d("Agenda", "ContatoActivity onActivityResult")
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK){
             val extras = data?.extras
             val imageBitmap = extras!!.get("data") as Bitmap
@@ -100,9 +102,8 @@ class ContatoActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
+        Log.d("Agenda", "ContatoActivity On resume")
         val txtDatanascimento: Button = findViewById(R.id.txtDatanascimento)
-
         val dateSetListener =
             DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
                 cal.set(Calendar.YEAR, year)
@@ -133,11 +134,17 @@ class ContatoActivity : AppCompatActivity() {
                 contato?.dataNascimento?.let {
                     txtDatanascimento.text = dateFormatter.format(Date(it))
                 }
-                contato?.foto?.let {
-                    readBitmapFile(it);
-                    mCurrentPhotoPath = it
-                    Log.d("agenda", "Path update: $it")
+
+                mCurrentPhotoPath?.let{
+                    readBitmapFile(it)
+                } ?: run{
+                    contato?.foto?.let {
+                        readBitmapFile(it);
+                        mCurrentPhotoPath = it
+                        Log.d("agenda", "Path update: $it")
+                    }
                 }
+
                 txtEmail?.setText(contato?.email)
                 txtSite?.setText(contato?.site)
             } else {
